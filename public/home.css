@@ -1,0 +1,10 @@
+a {
+    width: 91px;
+    height: 17px;
+    text-decoration: none;
+    border: 2px solid black;
+    border-radius: 6px;
+    padding: 4px;
+    background: rgb(20,20,20);
+    color: white;
+}

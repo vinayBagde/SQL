@@ -26,7 +26,13 @@
               <button>Edit username</button>
             </form>
           </td>
+          <td>
+            <form method="post" action="/user/<%= user.id %>?_method=DELETE">
+              <button>DELETE</button>
+            </form>
+          </td>
         </tr>
+
         <% } %>
       </tbody>
     </table>

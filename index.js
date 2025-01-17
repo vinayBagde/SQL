@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const methodOverride = require("method-override");
-
+const { v4: uuidv4 } = require("uuid");
 
 app.use(methodOverride("_method"));
 
@@ -49,8 +49,28 @@ let getRandomUser = () => {
 //   data.push(getRandomUser());
 // }
 
+app.get("/user/join", (req, res) => {
+  res.render("join.ejs");
+});
+
+app.post("/user/join", (req, res) => {
+  let id = uuidv4();
+  let { username, email, password } = req.body;
+  let user = [id, username, email, password];
+  let q = `INSERT INTO user (id, username, email, password) VALUES (?, ?, ?, ?)`;
+  try {
+    connection.query(q, user, (err, result) => {
+      if (err) throw err;
+      console.log(result);
+      res.redirect("/users");
+    });
+  } catch (err) {
+    console.log(err);
+    res.send("some error in DB");
+  }
+});
 app.get("/", (req, res) => {
-  let q = ` SELECT count(*) FROM user`;
+  let q = `SELECT count(*) FROM user`;
   try {
     connection.query(
       q,
@@ -87,7 +107,7 @@ app.get("/user/:id/edit", (req, res) => {
   try {
     connection.query(q, (err, result) => {
       if (err) throw err;
-      let user = result[0]
+      let user = result[0];
       res.render("edit.ejs", { user });
       console.log(result);
     });
@@ -96,30 +116,42 @@ app.get("/user/:id/edit", (req, res) => {
   }
 });
 
-
 app.patch("/user/:id", (req, res) => {
   let { id } = req.params;
-  let {password: formPass, username: newUsername} = req.body;
+  let { password: formPass, username: newUsername } = req.body;
   let q = `SELECT * FROM user WHERE id='${id}'`;
   try {
     connection.query(q, (err, result) => {
       if (err) throw err;
       let user = result[0];
-      if(formPass != user.password) {
+      if (formPass != user.password) {
         res.send("wrong password");
       } else {
         let q2 = `UPDATE user SET username='${newUsername}' WHERE id='${id}'`;
         connection.query(q2, (err, result) => {
           if (err) throw err;
           res.redirect("/users");
-        })
+        });
       }
-  
     });
   } catch (err) {
     res.send("some error occurred");
   }
-})
+});
+
+app.delete("/user/:id", (req, res) => {
+  let { id } = req.params;
+  let q = `DELETE FROM user WHERE id='${id}'`;
+  try {
+    connection.query(q, (err, result) => {
+      if (err) throw err;
+      console.log(result);
+      res.redirect("/users");
+    });
+  } catch (err) {
+    res.send("some error occurred");
+  }
+});
 
 const port = 8080;
 
